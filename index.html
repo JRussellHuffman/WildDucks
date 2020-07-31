@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
+        <script src="airtable.browser.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <!-- <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet"> -->
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;200;300;400;600&display=swap" rel="stylesheet">
+        <title>Wild Ducks Playing Cards</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    </head>
+    <body>
+      <div class="header">
+        <div class="logo-container">
+          <h1>Wild Ducks Playing Cards</h1>
+          <!-- <img id="logo" src="assets/logo.png" alt="logo"> -->
+        </div>
+      </div>
+      <div class="intro">
+        <span>
+          IBM is full of creative people from all around the world. Wild Ducks Playing Cards is a unique opportunity for these creatives to make art at the same scale that IBMers work, globally and collaboratively.
+          <br>
+          <br>
+          Each edition of Wild Ducks Playing Cards is an annual effort between 55 artists - one person for each of the 52 standard cards, the 2 jokers, and the back of the cards.
+          <br>
+          <br>
+          Below is a showcase of all the artists' work for this project over the past 3 years.</span>
+      </div>
+      <div class="showcase">
+        <h2>Third Edition</h2>
+        <div class="edition_description">
+
+        </div>
+        <img class="showcase" src="source/deck3.jpg" alt="Wild Ducks Playin Cards 1st edition box and cards">
+      </div>
+      <div id="deck-3"></div>
+      <div class="showcase">
+        <h2>Second Edition</h2>
+        <img class="showcase" src="source/deck2.jpg" alt="Wild Ducks Playin Cards 2nd edition box and cards">
+      </div>
+      <div id="deck-2"></div>
+      <div class="showcase">
+        <h2>First Edition</h2>
+        <img class="showcase" src="source/deck1.jpg" alt="Wild Ducks Playin Cards 3rd edition box and cards">
+      </div>
+      <div id="deck-1"></div>
+      <div id="about"></div>
+      <div class="modal-container">
+        <div class="modal-BG"></div>
+        <div class="modal-FG"></div>
+      </div>
+    </body>
+
+
+    <script>
+
+var Airtable = require('airtable');
+var base = new Airtable({apiKey: 'key4AQIgf9vVup0R4'}).base('appLwsWDq0TBP2h89');
+
+var filterArray = [];
+
+base('Table 1').select({
+    // Selecting the first 3 records in Grid view:
+    maxRecords: 165,
+    view: "Grid view"
+}).eachPage(function page(records, fetchNextPage) {
+    // This function (`page`) will get called for each page of records.
+
+    records.forEach(function(record) {
+      var deckNumber = record.get('Deck');
+        $('#deck-'+deckNumber).append($('<div>').attr("id", record.get('Art')[0].id)) //make a container with the item's ID, append all items to that container
+        var artName = record.get('Name');
+        var artist = record.get('Artist');
+        var thumbArtURL = record.get('Thumb')[0].url;
+        var fullArtURL = record.get('Art')[0].url;
+
+
+          $('#' + record.get('Art')[0].id)
+          .addClass("art-container")
+          .append("<div class='hover-text-container'><span class='hover-text'>"+ artName + "</span></div>")
+          .data("foo", "test")
+          // .append($('<H1>').text(artName))
+          // .append($('<H3>').text(artNotes))
+          .append('<img class="thumb" src="' + thumbArtURL + '">')
+          .append($('<br>'))
+          .attr("large-url", fullArtURL)
+          .attr("art-name", artName)
+          .attr("art-notes", artist)
+          // .attr("tags", tags);
+
+          openLightBox();
+
+    });
+
+    // To fetch the next page of records, call `fetchNextPage`.
+    // If there are more records, `page` will get called again.
+    // If there are no more records, `done` will get called.
+    fetchNextPage();
+
+}, function done(err) {
+    if (err) { console.error(err); return; }
+});
+
+//convert cell of comma seperated tags to useablle array
+function convertToArray (tags) {
+  // console.log(tags);
+  var splitTags = tags.split(', ');
+  return splitTags;
+}
+
+function closelightBox() {
+  $(".modal-BG").click(function() {
+    $(".modal-container").hide();
+  })
+}
+
+function openLightBox() {
+  $(".art-container").click(function() {
+
+    var artUrl = $(this).attr("large-url");
+    var artName = $(this).attr("art-name");
+    var artNotes = $(this).attr("art-notes");
+
+    $(".modal-container").show();
+    populateLightBox(artUrl, artName, artNotes);
+  })
+}
+
+function populateLightBox(url, name, notes) {
+  $(".modal-FG").empty();
+  // var url = $(this).attr("large-url");
+  // console.log("the url is " + url);
+
+  $(".modal-FG").append('<img class="large" src="' + url + '">')
+    .append($('<div class="description"></div>'));
+    // .append($('<H1>').text(name))
+    // .append($('<H3>').text(notes))
+  $("div.description")
+    // .append($('<H1>').text(name))
+    .append($('<H4>').text(notes))
+}
+
+closelightBox();
+
+</script>
+</html>
